@@ -47,4 +47,3 @@ contract lottery{
         participants=new address payable [](0);
      }
 }
-
