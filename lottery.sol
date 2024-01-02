@@ -1,49 +1,49 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.18;
-contract lottery{
 
+contract Lottery {
+
+    // Address of the manager who deploys the contract
     address public manager;
-    // more  participants honge so aaray
-    address payable[] public  participants;
 
-    constructor ()
-    { 
-        // jab deploy hoga toh jise karenge unka addres yaha store ho jayega
-        manager=msg.sender;//global variable
+    // Array to store participants' addresses
+    address payable[] public participants;
+
+    // Constructor: Initializes the manager when the contract is deployed
+    constructor() {
+        manager = msg.sender; // Global variable storing the manager's address
     }
 
+    // Fallback function: Allows participants to send 1 ether to participate
+    receive() external payable {
+        require(msg.value == 1 ether, "You must send exactly 1 ether to participate.");
+        participants.push(payable(msg.sender));
+    }
 
-    receive() external payable //ek baar hi use kr skte h pure contract me
-    {    require(msg.value==1 ether, "You must send exactly 1 ether to participate.");
-       participants.push(payable (msg.sender));
-     }
-
-     function getbalance()public view returns (uint)
-     {  require(msg.sender==manager, "Only the manager can check the balance.");
+    // Function to get the contract balance (only accessible by the manager)
+    function getBalance() public view returns (uint) {
+        require(msg.sender == manager, "Only the manager can check the balance.");
         return address(this).balance;
-     }
+    }
 
-     function random()private  view  returns(uint)
-     {
-        // dont use in smart contracts
-        return  uint( keccak256(abi.encodePacked(block.prevrandao,block.timestamp,participants.length)));
-     }
+    // Function to generate a random number (private)
+    function random() private view returns (uint) {
+        // Note: Using block.timestamp for randomness is not secure in production
+        return uint(keccak256(abi.encodePacked(block.prevrandao, block.timestamp, participants.length)));
+    }
 
-     function winnerParticipate()public 
-     {
-        require(msg.sender==manager, "Not enough participants to pick a winner.");
-        require(participants.length>=3);
-    
+    // Function to pick a winner among participants (only accessible by the manager)
+    function pickWinner() public {
+        require(msg.sender == manager, "Only the manager can pick a winner.");
+        require(participants.length >= 3, "Not enough participants to pick a winner.");
 
-  address payable  winner;
-  
-    // length se kam hi aayegi
-  
-        uint index=(random())%participants.length;
-        winner=participants[index];
+        address payable winner;
+        uint index = random() % participants.length; // Select a random index
+        winner = participants[index]; // Select the winner
 
-        winner.transfer(getbalance());
-// reseting dynamic array or become zero and after than only managrer can reset 
-        participants=new address payable [](0);
-     }
+        winner.transfer(getBalance()); // Transfer the contract balance to the winner
+
+        // Reset participants array to zero length
+        participants = new address payable[](0);
+    }
 }
