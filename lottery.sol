@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.18;
 
+
+
+
 contract Lottery {
 
     // Address of the manager who deploys the contract
